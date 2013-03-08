@@ -4,8 +4,7 @@ require "json"
 class TwitterRequest
 CONFIG = JSON.parse(File.new(File.join(File.dirname(__FILE__), "/../config.json")).read)
   
-  def initialize(cache, path)
-    @cache = cache
+  def initialize(path)
     @path = path
   end
 
@@ -16,11 +15,7 @@ CONFIG = JSON.parse(File.new(File.join(File.dirname(__FILE__), "/../config.json"
   end
 
   def response 
-   if !@cache.get(@path)
-     response =  access_token.request(:get, "https://api.twitter.com/1.1/" + @path)
-     @cache.put(@path, response)
-   end
-   @cache.get(@path)
+    access_token.request(:get, "https://api.twitter.com/1.1/" + @path)
   end
 
 end

@@ -1,13 +1,5 @@
-require File.join(File.dirname(__FILE__), "/../lib/cache.rb")
+require File.join(File.dirname(__FILE__), "/spec_helper.rb")
 
-class Time 
-  def self.is value 
-    Time.stub(:now).and_return(value)
-    yield   
-    Time.unstub(:now)
-  end
-end
-  
 describe Cache do
 
   it "should return nil if the request has not been cached" do

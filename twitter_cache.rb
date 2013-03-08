@@ -1,27 +1,13 @@
-require './lib/twitter_request.rb'
+require './lib/request_controller.rb'
+require './lib/query_builder.rb'
 require './lib/cache.rb'
 require 'sinatra'
 
-CACHE = Cache.new(15 * 60)
+cache = Cache.new(15 * 60)
+REQUEST_CONTROLLER = RequestController.new(cache)
 
 get '/*' do
-  @limit_remaining ||= 1
-  @limit_reset ||= 1
-
-  query = "#{params[:splat].first}?q=#{params["q"]}"
-  if can_make_request?
-    request = TwitterRequest.new(CACHE, query) 
-    response = request.response
-    if response.code == 200
-      @limit_remaining = response.header['X-Rate-Limit-Remaining']
-      @limit_reset = response.header['X-Rate-Limit-Reset']
-    end
-    response.body
-  else
-    %Q{{"errors": [{"code": 88, "message": "Rate limit exceeded"}]}}
-  end
+  query = QueryBuilder.build_from(params)
+  REQUEST_CONTROLLER.handle(query).body
 end
 
-def can_make_request?
-  @limit_remaining > 0 || Time.now.utc.to_i > @limit_reset
-end
